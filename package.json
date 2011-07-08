@@ -1,0 +1,31 @@
+{
+	"name": "konode",
+	"version": "0.1.1",
+	
+	"description": "A web framework based on Knockout.js and Node.js",
+	
+	"author": {
+		"name": "Sean Micklethwaite"
+	},
+	
+	"files": [""],
+	
+	"main": "main",
+	
+	"bin": {
+		"konode": "./manage.js"
+	},
+	
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/tehsenaus/konode.git"
+	},
+	
+	"dependencies": {
+		"rightjs": ">=2.2.3",
+		"underscore": ">=1.1.6",
+		"connect": ">=1.5.2",
+		"jsdom": ">=0.2.0",
+		"browserify": ">=1.2.8"
+	}
+}
