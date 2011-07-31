@@ -1,0 +1,14 @@
+<html>
+<head>
+	<title>Hello world!</title>
+	<script src="/konode.js"></script>
+	<script src="/site.js"></script>
+	<script language="javascript">
+		ko.applyBindings(require("siteViewModel"));
+	</script>
+</head>
+
+<body>
+	<h1>Hello world from <span data-bind="text: site">konode</span>!</h1>
+</body>
+</html>
