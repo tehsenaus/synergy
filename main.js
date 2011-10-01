@@ -13,14 +13,15 @@ var resource = require("resource");
 var server = require("./server");
 
 var defaults = {
-	host: "localhost",
 	api_root: "/api",
 	
 	wrap_host: function (server, options) {
-		return connect.vhost(this.host, server);
+		var host = this.host;
+		return host ? connect.vhost(host, server) : server;
 	},
 	wrap_libs: function (server, options) {
-		return connect.vhost(this.libs_host || this.host, server);
+		var host = this.libs_host || this.host;
+		return host ? connect.vhost(host, server) : server;
 	},
 	wrap_api: function (server, options) {
 		var root = {};
@@ -29,9 +30,9 @@ var defaults = {
 			res.notFound('resource not found');
 		}
 		
-		return connect.vhost(
-			this.api_host || this.host, connect(dispatch(root))
-		);
+		var host = this.api_host || this.host;
+		server = connect(dispatch(root));
+		return host ? connect.vhost(host, server) : connect(server);
 	},
 	
 	port: process.env.PORT || 8080
@@ -82,7 +83,7 @@ module.exports = function(options) {
 	}
 	
 	var server = connect(
-		options.wrap_libs(connect(konode_js)),
+		options.wrap_libs(konode_js),
 		
 		quip(),
 
@@ -98,6 +99,7 @@ module.exports = function(options) {
 		// Template server (main index)
 		options.wrap_host(connect(
 			function(req, response) {
+				console.log("R", req);
 				if(req.url == "/" || req.url == "")
 					response.end(template);
 				else {
