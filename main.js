@@ -1,14 +1,40 @@
 
+var path = require('path');
 var fs = require('fs');
 var connect = require("connect");
-var browserify = require("konode_browserify");
+var dispatch = require("dispatch");
+var quip = require("quip");
+var browserify = require("browserify");
 var _ = require("underscore");
 var jsdom = require("jsdom");
+//var hash = require("mhash").hash;
+var less = require('less');
+var resource = require("resource");
+var server = require("./server");
 
 var defaults = {
 	host: "localhost",
-	port: 8080,
-	apps: []
+	api_root: "/api",
+	
+	wrap_host: function (server, options) {
+		return connect.vhost(this.host, server);
+	},
+	wrap_libs: function (server, options) {
+		return connect.vhost(this.libs_host || this.host, server);
+	},
+	wrap_api: function (server, options) {
+		var root = {};
+		root[this.api_root + '/'] = server;
+		root[this.api_root + '.*'] = function(req, res) {
+			res.notFound('resource not found');
+		}
+		
+		return connect.vhost(
+			this.api_host || this.host, connect(dispatch(root))
+		);
+	},
+	
+	port: process.env.PORT || 8080
 }
 
 module.exports = function(options) {
@@ -24,7 +50,7 @@ module.exports = function(options) {
 	
 	var konode_js = browserify({
 		mount: "/site.js",
-		require: ["konode/client", "./viewmodel"]
+		require: ["synergy/client", "./viewmodel"]
 	});
 	
 	// Add libraries to bundle
@@ -41,14 +67,36 @@ module.exports = function(options) {
 		});
 	})(__dirname + "/lib");
 	
+	// Load CSS
+	// TODO: versioning
+	var styles = "body {color: blue}";
+	if(options.styles) {
+		styles = fs.readFileSync(options.styles).toString();
+		var parser = new less.Parser({
+			paths: [path.dirname(options.styles)],
+			filename: options.styles
+		});
+		parser.parse(styles, function (e, tree) {
+		    styles = tree.toCSS();
+		});
+	}
 	
 	var server = connect(
-		connect.vhost(options.libHost || options.host, connect(
-			konode_js
-		)),
+		options.wrap_libs(connect(konode_js)),
 		
+		quip(),
+
+		dispatch({
+			"/styles.css": function (req, res) {
+				res.css(styles);
+			}
+		}),
+
+		options.wrap_api(resource.createAPI()),
+		
+
 		// Template server (main index)
-		connect.vhost(options.host, connect(
+		options.wrap_host(connect(
 			function(req, response) {
 				if(req.url == "/" || req.url == "")
 					response.end(template);
@@ -61,7 +109,10 @@ module.exports = function(options) {
 			}
 		))
 		
-	).listen(options.port);
+	);
+	
+	if(options.port)
+		server = server.listen(options.port);
 	
 	//var wnd = jsdom.jsdom(template).createWindow();
 	//console.log(wnd);
@@ -69,5 +120,6 @@ module.exports = function(options) {
 	return server;
 };
 
-module.exports.core = require("konode/core");
+module.exports.core = require("./core");
+module.exports.defaults = defaults;
 //module.exports.server = require("konode/server");

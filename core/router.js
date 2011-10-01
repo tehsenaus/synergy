@@ -3,7 +3,7 @@
  * Shared URL router
  */
 
-var Class = require("konode/core/class");
+var Class = require("coop").Class;
 
 console.log("core.router", module.id);
 
@@ -24,7 +24,9 @@ var Router = new Class({
     },
     
     dispatch: function (url) {
-    	if (!this.routes.some(function (r) {
+    	console.log("dispatch", url, this.routes);
+    	
+    	return (this.routes.some(function (r) {
             var m = r.regex.exec(url);
             if (m) {
 
@@ -35,18 +37,18 @@ var Router = new Class({
                 });
 
                 r.dispatch.apply(this, m);
-                return true;
+                return r;
             }
-        } .bind(this))) {
+        }, this) || (
             // Clear state
             this.routes.each(function (_r) {
                 if (typeof _r.clear == "function") _r.clear();
-            });
-        };
-        return false;
+            }) && false)
+        );
     },
     
     reverse: function (routeName, args) {
+        args = args || [];
         for (var i = 0; i < this.routes.length; i++) {
             var r = this.routes[i];
             if (r.name === routeName) {
@@ -65,12 +67,16 @@ var Router = new Class({
                         };
                     } else url += src[j];
                 };
-                return "#" + url + src.slice(j, src.length);
+                return this.makeUrl(url + src.slice(j, src.length));
             };
         };
         throw "No such route: " + routeName;
     },
     
+    makeUrl: function (url) {
+        return url;    
+    },
+
     observable: function (regex, name, value) {
         var o = ko.observable(value);
         this.routes.push({

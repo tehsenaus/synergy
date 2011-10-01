@@ -3,22 +3,41 @@
  * Implements client-side URL routing
  */
 
-console.log("cl");
-
 var Router = require("../core").Router;
-
-console.log("client.router");
 
 Router.implement({
 	listen: function () {
 		$(window).bind('hashchange', function (e) {
 	        console.log(e);
 	    } .bind(this));
-		
-		$(document).ready(function () {
-            $(window).trigger('hashchange');
-        });
-	}
+
+        this.initListener();
+	},
+
+	initListener: function () {},
+	/*makeUrl: function (url) {
+		return "#" + url;
+	}*/
 });
+
+if(typeof history.pushState == "function") {
+	Router.implement({
+		initListener: function () {
+			if(window.location.hash && this.dispatch(window.location.hash.slice(1))) {
+				history.replaceState(null, null, window.location.hash.slice(1));
+			}
+
+			var router = this;
+			$('a').live('click', function (e) {
+				var url = $(this).attr('href');
+				if(router.dispatch(url)) {
+					e.preventDefault();
+					history.pushState(null, null, url);
+					return false;
+				}
+			});
+		}
+	});
+}
 
 module.exports = Router;
