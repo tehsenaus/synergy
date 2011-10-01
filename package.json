@@ -1,6 +1,6 @@
 {
 	"name": "synergy",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	
 	"description": "A web framework based on Knockout.js and Node.js",
 	
