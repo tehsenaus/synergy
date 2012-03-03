@@ -29,7 +29,7 @@
 		"jsdom": ">=0.2.0",
 		"browserify": ">=1.10.0",
 		"less": ">=1.2.2",
-		"resource": ">=0.1.0",
+		"resource": "https://github.com/tehsenaus/node-resource/tarball/master",
 		"coop": ">=0.0.1"
 	}
 }
