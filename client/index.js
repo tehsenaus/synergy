@@ -1,6 +1,5 @@
 
+var exports = module.exports = require("../core");
 
-module.exports = {
-	models: require("./models"),
-	Router: require("./router")
-}
+exports.resource = require("resource/client");
+exports.Router = require("./router");

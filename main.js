@@ -9,7 +9,7 @@ var _ = require("underscore");
 var jsdom = require("jsdom");
 //var hash = require("mhash").hash;
 var less = require('less');
-var resource = require("resource");
+var resource = require("resource/server");
 var server = require("./server");
 
 var defaults = {
@@ -29,10 +29,10 @@ var defaults = {
 		root[this.api_root + '.*'] = function(req, res) {
 			res.notFound('resource not found');
 		}
-		
+
 		var host = this.api_host || this.host;
-		server = connect(dispatch(root));
-		return host ? connect.vhost(host, server) : connect(server);
+		server = dispatch(root);
+		return host ? connect.vhost(host, server) : server;
 	},
 	
 	port: process.env.PORT || 8080
@@ -51,7 +51,7 @@ module.exports = function(options) {
 	
 	var konode_js = browserify({
 		mount: "/site.js",
-		require: ["synergy/client", "./viewmodel"]
+		require: ["./viewmodel"]
 	});
 	
 	// Add libraries to bundle
@@ -99,7 +99,6 @@ module.exports = function(options) {
 		// Template server (main index)
 		options.wrap_host(connect(
 			function(req, response) {
-				console.log("R", req);
 				if(req.url == "/" || req.url == "")
 					response.end(template);
 				else {
@@ -110,11 +109,8 @@ module.exports = function(options) {
 				}
 			}
 		))
-		
-	);
 	
-	if(options.port)
-		server = server.listen(options.port);
+	);
 	
 	//var wnd = jsdom.jsdom(template).createWindow();
 	//console.log(wnd);
