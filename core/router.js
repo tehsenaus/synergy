@@ -24,27 +24,31 @@ var Router = new Class({
     },
     
     dispatch: function (url) {
-    	console.log("dispatch", url, this.routes);
+        var matchedRoutes = [], matchedArgs = [];
     	
-    	return (this.routes.some(function (r) {
+        this.routes.forEach(function (r) {
             var m = r.regex.exec(url);
             if (m) {
-
-                // Clear state
-                this.routes.each(function (_r) {
-                    if (_r != r && typeof _r.clear == "function")
-                        _r.clear();
-                });
-
-                r.dispatch.apply(this, m);
-                return r;
+                matchedRoutes.push(r);
+                matchedArgs.push(m);
             }
-        }, this) || (
-            // Clear state
-            this.routes.each(function (_r) {
-                if (typeof _r.clear == "function") _r.clear();
-            }) && false)
-        );
+        }, this);
+
+        // Clear state
+        this.routes.forEach(function (_r) {
+            if (matchedRoutes.indexOf(_r) < 0 && typeof _r.clear == "function") {
+                _r.clear();
+            }
+        });
+
+        console.log("dispatch", url, matchedRoutes);
+
+        // Dispatch to all matched routes
+        matchedRoutes.forEach(function (r, i) {
+            r.dispatch.apply(this, matchedArgs[i]);
+        }, this);
+
+        return matchedRoutes;
     },
     
     reverse: function (routeName) {
@@ -57,7 +61,7 @@ var Router = new Class({
                 var src = r.regex.source.replace(/(\^|\$)/g, "").replace(/\\\//g, '/');
                 for (var j = 0, a = 0; a < args.length && j < src.length; j++) {
                     if (src[j] === '(') {
-                        var lvl = 1;
+                        var lvl = 0;
                         url += args[a++];
                         for (; j < src.length; j++) {
                             if (src[j] === '(') lvl++;

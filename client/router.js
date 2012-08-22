@@ -30,9 +30,8 @@ if(typeof history.pushState == "function") {
 			var router = this;
 			$('a').live('click', function (e) {
 				var url = $(this).attr('href');
-				if(router.dispatch(url)) {
+				if ( this.go(url) ) {
 					e.preventDefault();
-					history.pushState(null, null, url);
 					return false;
 				}
 			});
@@ -40,6 +39,18 @@ if(typeof history.pushState == "function") {
 			$(window).bind('popstate', function () {
 				router.dispatch(decodeURIComponent(window.location.pathname));
 			});
+		},
+
+		go: function (url) {
+			if ( url[0] !== '/' ) {
+				var path = window.location.pathname;
+				url = path.slice(0, path.lastIndexOf('/') + 1) + url;
+			}
+
+			if(this.dispatch(url)) {
+				history.pushState(null, null, url);
+				return true;
+			}
 		}
 	});
 }
