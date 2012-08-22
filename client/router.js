@@ -23,7 +23,7 @@ Router.implement({
 if(typeof history.pushState == "function") {
 	Router.implement({
 		initListener: function () {
-			if(window.location.hash && this.dispatch(window.location.hash.slice(1))) {
+			if(window.location.hash && this.dispatch(decodeURIComponent(window.location.hash.slice(1)))) {
 				history.replaceState(null, null, window.location.hash.slice(1));
 			}
 
@@ -35,6 +35,10 @@ if(typeof history.pushState == "function") {
 					history.pushState(null, null, url);
 					return false;
 				}
+			});
+
+			$(window).bind('popstate', function () {
+				router.dispatch(decodeURIComponent(window.location.pathname));
 			});
 		}
 	});

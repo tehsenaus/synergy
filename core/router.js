@@ -47,14 +47,14 @@ var Router = new Class({
         );
     },
     
-    reverse: function (routeName, args) {
-        args = args || [];
+    reverse: function (routeName) {
+        var args = [].slice.call(arguments, 1);
         for (var i = 0; i < this.routes.length; i++) {
             var r = this.routes[i];
             if (r.name === routeName) {
                 // Build URL
                 var url = "";
-                var src = r.regex.source.replace(/(\^|\$)/, "").replace('\\/', '/');
+                var src = r.regex.source.replace(/(\^|\$)/g, "").replace(/\\\//g, '/');
                 for (var j = 0, a = 0; a < args.length && j < src.length; j++) {
                     if (src[j] === '(') {
                         var lvl = 1;
