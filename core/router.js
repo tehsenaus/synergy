@@ -44,10 +44,12 @@ var Router = new Class({
         console.log("dispatch", url, matchedRoutes);
 
         // Dispatch to all matched routes
-        matchedRoutes.forEach(function (r, i) {
-            r.dispatch.apply(this, matchedArgs[i]);
-        }, this);
-
+        process.nextTick(function () {
+            matchedRoutes.forEach(function (r, i) {
+                r.dispatch.apply(this, matchedArgs[i]);
+            }, this);
+        });
+        
         return matchedRoutes;
     },
     

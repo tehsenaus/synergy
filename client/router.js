@@ -30,7 +30,7 @@ if(typeof history.pushState == "function") {
 			var router = this;
 			$('a').live('click', function (e) {
 				var url = $(this).attr('href');
-				if ( this.go(url) ) {
+				if ( router.go(url) ) {
 					e.preventDefault();
 					return false;
 				}
